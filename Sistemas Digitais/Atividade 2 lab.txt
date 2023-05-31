@@ -1,0 +1,23 @@
+s3 = D
+S2 = Clear
+S1 = Clock
+p1 = Fonte
+Resistor = serve para uma quebra de tensao para nao queimar o led
+
+U = Flip Flop Duplo
+
+
+p1- vai pra gnd de U1 e U2
+p1+ vai para vcc de U1 e U2, para os presets de U1 e U2, e para o Clear e o Clock
+p1 serve para dar energia ao circuito " os 2 flip flops duplos e pro led "
+
+S3 vai pra 
+-> d1 U1 - 1Q U1 
+-> d2 U1 - 2Q U1 
+-> d1 U2 - 1Q U2 
+-> d2 U2 - 2Q U2
+
+Fio azul = energia de p1+ para o preset/definir
+Fio verde norte = Leva p1+ para o clear e o pre set
+Fio Amarelo = Leva o Clock para os Flip Flops
+Fio Laranja = Leva o Clear para os Flip Flops

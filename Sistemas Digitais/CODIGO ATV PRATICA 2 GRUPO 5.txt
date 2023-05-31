@@ -1,0 +1,46 @@
+
+
+void setup() {
+  // put your setup code here, to run once:
+ 
+  pinMode(6,OUTPUT);
+  
+  Serial.begin(9600);
+ 
+ 
+}
+
+int leitura = 0;
+int conversao = 0;
+
+void loop() {
+  // put your main code here, to run repeatedly:
+ 
+  /*1 - Ler os dados;
+   *
+   *2 - Quantização dos dados;
+   *
+   *3 - Reconstrução do sinal;
+   *
+   *4 - Reescrita
+   */
+
+  //AD
+  leitura = analogRead(A0);//leitura
+  Serial.println(leitura,DEC);
+ 
+  for(int i = 1; i <= 16; i++){//quantização e codificação
+    if(leitura < 64*i){
+      conversao = i-1;
+      break;
+    }
+  }//for
+
+  //DA
+  conversao = conversao * 64;//reconstrução do sinal
+
+  analogWrite(6,conversao*0.265625);//reescrita
+
+  delayMicroseconds(125);
+ 
+}//loop

@@ -1,0 +1,94 @@
+#include <esp32dacFast.h>
+
+#define DAC0 26
+#define TAM 40000
+//8KHz, 5 seg
+
+void setup() {
+  
+  pinMode(32,INPUT);//record
+  pinMode(35,INPUT);//erase
+  pinMode(34,INPUT);//play
+  pinMode(25,INPUT);//sensor
+  pinMode(26,OUTPUT);//alto falante
+  pinMode(18,OUTPUT);//led record (vermelho)
+  pinMode(19,OUTPUT);//led play (azul)
+
+  Serial.begin(74880);
+
+}
+
+short ler[TAM];
+int auxOpc = 0;
+
+void loop() {
+
+  //condicao de ativacao dos botoes
+  //ativa a variável auxiliar ao receber valor alto, permitindo o uso no switch case posteriormente
+  if(digitalRead(32) == 1){
+    auxOpc = 1;
+  }//botão de record
+  if(digitalRead(35) == 1){
+    auxOpc = 2;
+  }//botão de erase
+  if(digitalRead(34) == 1){
+    auxOpc = 3;
+  }//botão de play
+
+  switch(auxOpc){//casos que variam dependendo de qual botão foi apertado
+    case 1://caso record
+      digitalWrite(18,HIGH);//acende o led vermelho, que indica que está ocorrendo a gravação
+
+      for(int i = 0; i < TAM; i++){
+        ler[i] = analogRead(25);
+        
+        delayMicroseconds(125);
+      }//loop que faz a leitura do sinal analógico recebido pelo sensor
+      
+      
+      auxOpc = 0;
+
+      for(int i = 0; i < TAM; i++){
+        
+        for(int j = 1; j <= 64; j++){//j<=64 pois são 64 níveis
+          if(ler[i] < j*64){
+            
+            ler[i] = j-1;
+            break;
+          }//condição que atribui ao vetor ler[] o valor quantizado e codificado
+        }
+        Serial.println(ler[i], DEC);
+      }
+      digitalWrite(18,LOW);//apaga o led vermelho, pois já se encerrou a gravação
+
+    break;
+
+    case 2://caso erase
+      for(int i = 0; i < TAM; i++){//passa zerando o vetor onde foi gravado o sinal
+        ler[i] = 0;
+      }
+    break;
+
+    case 3://caso play
+      digitalWrite(19,HIGH);
+      for(int i = 0; i < TAM; i++){        
+        ler[i] = ler[i] * 64;//conversão para os intervalos        
+        dacFastWrite26(ler[i]*0.063);//escrita digital/analogica
+        //multiplica por 0.063 para converter a escala de 0 a 255
+
+        delayMicroseconds(125);
+      }
+      
+      for(int i = 0; i < TAM; i++){
+        ler[i] = ler[i] / 64;
+      }//recodifica o sinal para que permaneca "intacto"
+      digitalWrite(19,LOW);
+    break;
+
+    default:       
+    break;
+  }
+
+  delayMicroseconds(125);
+
+}// loop
